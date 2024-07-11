@@ -1,19 +1,114 @@
-# Challenge
+# NLP Hackathon Project
 
-Have fun and build your skills! 🚀
+## Goal
 
-### Goal
+Predict `ratings_simplified` using the `review` column only. If there's time after you have a good model working and hypertuned, you can use the `drugName` and `condition` columns in your model too.
 
-Predict `ratings_simplified` using the the `review` column only. If there's time after you have a good model working and hypertuned, you can use the `drugName` and `condition` columns in your model too.
-
-The goal is to make a model that scores well on your 25% of the test (holdout) set, without any data leakage. Use `random_state=123` when you have a random_state option. 
+The goal is to make a model that scores well on your 25% of the test (holdout) set, without any data leakage. Use `random_state=123` when you have a random_state option.
 
 Use different text encoding options and different algorithms. You can make as many models as you like.
 
 
-### Roles
+## Overview
 
-- Everyone should do the work. One person should share their screen in the group.
-- One person from your group will be the spokesperson who will present your results. 
+This project, developed in collaboration with [Holly Heath](https://www.linkedin.com/in/hollyaheath/), aims to create an effective predictive model using natural language processing (NLP) techniques to analyze drug reviews. Our goal was to classify reviews based on their ratings, leveraging machine learning algorithms to provide accurate predictions and insights.
 
-## Have fun! 😀
+## Dataset
+
+The dataset consists of 3,609 drug reviews, including the following columns:
+- `drugName`: Name of the drug
+- `condition`: Condition treated by the drug
+- `review`: Text of the review
+- `ratings_simplified`: Simplified rating of the drug
+
+### Data Cleaning and Preprocessing
+
+1. **Removed unnecessary columns**: `User_ID`, `rating`, `date`, and `usefulCount`.
+2. **Preprocessed the reviews**: Removed special characters, tokenized, lemmatized/stemmed, and removed stop words.
+
+## Exploratory Data Analysis (EDA)
+
+We performed EDA to understand the distribution of the data:
+- **Rating Distribution**:
+  - 4: 63.87%
+  - 3: 15.96%
+  - 1: 11.53%
+  - 2: 8.65%
+
+## Feature Engineering
+
+We used `CountVectorizer` to transform the text data into numerical format suitable for machine learning models. This vectorizer converts a collection of text documents to a matrix of token counts.
+
+### CountVectorizer Parameters
+
+- `stop_words`: Removed common stop words.
+- `max_features`: Included the N most popular vocabulary words.
+- `max_df`: Ignored words that appear in a specified proportion of documents.
+- `min_df`: Included words that appear in a specified number of documents.
+- `ngram_range`: Captured n-word phrases.
+
+## Baseline Model
+
+We established a baseline accuracy by predicting the most frequent class (rating of 4), resulting in a baseline accuracy of 63.87%.
+
+## Model Development
+
+We developed multiple models using `CountVectorizer` and different classifiers, including `MultinomialNB` and `LogisticRegression`. We optimized the models using `GridSearchCV` to find the best hyperparameters.
+
+### Pipeline and GridSearch
+
+We created a pipeline with `CountVectorizer` and `MultinomialNB`, and used `GridSearchCV` to optimize the parameters.
+
+#### Pipeline and Parameters
+
+```python
+pipe = Pipeline([
+    ('cvec', CountVectorizer()),
+    ('nb', MultinomialNB())
+])
+
+pipe_params = {
+    'cvec__max_features': [2000, 5000, 8000],
+    'cvec__min_df': [2, 3],
+    'cvec__max_df': [0.95, 0.98],
+    'cvec__ngram_range': [(1, 1), (1, 2)]
+}
+
+gs = GridSearchCV(pipe, pipe_params, cv=5)
+gs.fit(X_train, y_train)
+
+## Best Model
+
+The best model parameters were:
+
+- `cvec__max_df`: 0.95
+- `cvec__max_features`: 8000
+- `cvec__min_df`: 2
+- `cvec__ngram_range`: (1, 2)
+
+The best training score was 0.776.
+
+## Model Evaluation
+
+- **Training Set Accuracy**: 93.64%
+- **Testing Set Accuracy**: 76.63%
+
+We evaluated the model using confusion matrices and ROC curves to understand its performance and identify any overfitting or data leakage.
+
+## Results Interpretation
+
+The model showed signs of overfitting, likely due to its complexity. Further steps include simplifying the model, exploring additional feature selection methods, and potentially using SpaCy for more advanced NLP preprocessing.
+
+## Conclusion
+
+Our NLP model demonstrated strong performance in predicting drug review ratings, achieving a testing accuracy of 76.63%. Future work includes refining feature selection and exploring more sophisticated NLP techniques to improve model generalization and accuracy.
+
+## Possible Next Steps
+
+1. **Simplify the model**: Reduce complexity to improve generalization.
+2. **Feature selection**: Identify and select the most relevant features.
+3. **Advanced NLP techniques**: Use tools like SpaCy for better preprocessing and feature extraction.
+
+## Acknowledgments
+
+This project was developed in collaboration with [Holly Heath](https://www.linkedin.com/in/hollyaheath/). We thank her for her valuable contributions and insights.
